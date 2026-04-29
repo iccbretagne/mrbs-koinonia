@@ -74,8 +74,11 @@ class SessionKoinonia extends Session
   // -------------------------------------------------------------------------
 
   /**
-   * Reads the Auth.js session token from the cookie jar.
-   * Tries both the plain name and the __Secure- prefixed variant.
+   * Reads the Auth.js session token from the raw Cookie header.
+   *
+   * PHP converts '.' to '_' in $_COOKIE keys, so 'authjs.session-token'
+   * becomes 'authjs_session-token' and is never found. Reading the raw
+   * HTTP_COOKIE header bypasses this sanitization.
    */
   private function readSessionToken(): ?string
   {
@@ -83,13 +86,39 @@ class SessionKoinonia extends Session
       ? KOINONIA_COOKIE_NAME
       : self::DEFAULT_COOKIE;
 
-    // Try exact name first, then the __Secure- prefixed variant.
+    $rawCookies = $_SERVER['HTTP_COOKIE'] ?? '';
+    if ($rawCookies === '') {
+      return null;
+    }
+
     foreach ([$cookieName, '__Secure-' . $cookieName] as $name) {
-      if (!empty($_COOKIE[$name])) {
-        return $_COOKIE[$name];
+      $value = $this->extractCookieValue($rawCookies, $name);
+      if ($value !== null) {
+        return $value;
       }
     }
 
+    return null;
+  }
+
+
+  /**
+   * Extracts a single cookie value from the raw Cookie header string.
+   */
+  private function extractCookieValue(string $rawCookies, string $name): ?string
+  {
+    foreach (explode(';', $rawCookies) as $part) {
+      $part = trim($part);
+      $eq   = strpos($part, '=');
+      if ($eq === false) {
+        continue;
+      }
+      $key = trim(substr($part, 0, $eq));
+      if ($key === $name) {
+        $value = trim(substr($part, $eq + 1));
+        return $value !== '' ? $value : null;
+      }
+    }
     return null;
   }
 
