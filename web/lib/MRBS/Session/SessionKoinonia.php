@@ -38,10 +38,10 @@ class SessionKoinonia extends Session
   {
     $token = $this->readSessionToken();
 
+    error_log('[SessionKoinonia] getCurrentUser: token=' . ($token ? 'present(' . strlen($token) . 'chars)' : 'null')
+      . ' url=' . ($_SERVER['REQUEST_URI'] ?? '?'));
+
     if ($token === null) {
-      // No session cookie — redirect if the current page needs auth.
-      // MRBS calls getCurrentUser() on every request; unauthenticated users
-      // on public pages (e.g. the read-only calendar) get level 0.
       if ($this->pageRequiresAuth()) {
         $this->redirectToLogin();
       }
@@ -49,6 +49,8 @@ class SessionKoinonia extends Session
     }
 
     $data = $this->callSessionApi($token);
+
+    error_log('[SessionKoinonia] callSessionApi result: ' . ($data !== null ? json_encode($data) : 'null'));
 
     if ($data === null) {
       // Token is invalid or Koinonia is unreachable.
