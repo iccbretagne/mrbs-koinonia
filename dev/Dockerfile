@@ -5,5 +5,8 @@ RUN apt-get update && apt-get install -y libicu-dev locales-all \
  && apt-get clean
 RUN docker-php-ext-install mysqli pdo pdo_mysql intl
 
+# Activer AllowOverride pour les .htaccess MRBS
+COPY mrbs.conf /etc/apache2/sites-available/000-default.conf
+
 # MRBS source (monté en volume, pas copié — pour dev)
 WORKDIR /var/www/html
