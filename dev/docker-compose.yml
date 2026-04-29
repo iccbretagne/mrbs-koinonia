@@ -1,0 +1,44 @@
+services:
+  mrbs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      # MRBS source — pointer vers ton installation locale
+      - ${MRBS_SOURCE:-/home/djalai/workspace/local/mrbs-1.12.1/web}:/var/www/html
+      # Plugin Koinonia — monté depuis le repo
+      - ../web/lib/MRBS/Auth/AuthKoinonia.php:/var/www/html/lib/MRBS/Auth/AuthKoinonia.php:ro
+      - ../web/lib/MRBS/Session/SessionKoinonia.php:/var/www/html/lib/MRBS/Session/SessionKoinonia.php:ro
+      # Config locale
+      - ./config.inc.php:/var/www/html/config.inc.php:ro
+    environment:
+      KOINONIA_BASE_URL:   ${KOINONIA_BASE_URL:-http://host.docker.internal:3000}
+      KOINONIA_API_SECRET: ${KOINONIA_API_SECRET:-change-me}
+      KOINONIA_CHURCH_ID:  ${KOINONIA_CHURCH_ID:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # Linux : résout host.docker.internal
+
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_DATABASE:      mrbs
+      MARIADB_USER:          mrbs
+      MARIADB_PASSWORD:      mrbs
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - mrbs_db:/var/lib/mysql
+      # Initialisation du schéma MRBS au premier démarrage
+      - ${MRBS_SOURCE:-/home/djalai/workspace/local/mrbs-1.12.1}/tables.my.sql:/docker-entrypoint-initdb.d/tables.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mrbs_db:
