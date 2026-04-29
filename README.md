@@ -45,11 +45,21 @@ $auth['session'] = 'koinonia';
 $cookie_domain = '.example.com';  // domaine parent partagé
 ```
 
+## Compatibilité
+
+| Plugin | MRBS | PHP | Koinonia |
+|---|---|---|---|
+| 1.x | 1.12.x | ≥ 8.1 | ≥ 1.1.13 |
+
+> Le plugin s'appuie sur le système de plugins `Auth` / `Session` de MRBS tel qu'il existe depuis la version 1.12. Les versions antérieures de MRBS utilisaient un système différent et ne sont pas supportées.
+>
+> La version minimale de Koinonia est 1.1.13 car c'est celle qui introduit le module `mrbs` et les endpoints `/api/auth/mrbs/*`.
+
 ## Prérequis
 
 - PHP ≥ 8.1
-- MRBS ≥ 1.12
-- Koinonia avec le module `mrbs` activé (`ENABLED_MODULES=mrbs`)
+- MRBS 1.12.x
+- Koinonia ≥ 1.1.13 avec le module `mrbs` activé (`ENABLED_MODULES=mrbs`)
 - MRBS et Koinonia servis depuis le même domaine parent (pour le partage de cookie)
 
 ## Licence
