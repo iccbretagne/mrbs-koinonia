@@ -1,0 +1,60 @@
+<?php
+// =============================================================================
+// Koinonia SSO — MRBS configuration example
+// =============================================================================
+// Copy relevant sections into your MRBS config.inc.php.
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// 1. Koinonia connection
+// ---------------------------------------------------------------------------
+
+// Base URL of your Koinonia instance (no trailing slash).
+define('KOINONIA_BASE_URL', 'https://koinonia.example.com');
+
+// Secret shared between MRBS and Koinonia.
+// Must match MRBS_API_SECRET in your Koinonia .env file.
+define('KOINONIA_API_SECRET', 'change-me-to-a-long-random-secret');
+
+// Koinonia churchId for this MRBS instance.
+// Find it in your Koinonia database or admin panel.
+define('KOINONIA_CHURCH_ID', 'clxxxxxxxxxxxxxxxxxxxxxxx');
+
+// Auth.js session cookie name.
+// - Development:  'authjs.session-token'  (default, leave commented out)
+// - Production:   '__Secure-authjs.session-token'
+//
+// define('KOINONIA_COOKIE_NAME', '__Secure-authjs.session-token');
+
+
+// ---------------------------------------------------------------------------
+// 2. Authentication & session
+// ---------------------------------------------------------------------------
+
+$auth['type']    = 'koinonia';
+$auth['session'] = 'koinonia';
+
+
+// ---------------------------------------------------------------------------
+// 3. Cookie domain sharing (required for SSO)
+// ---------------------------------------------------------------------------
+// Koinonia and MRBS must share the same cookie domain so the browser sends
+// the Auth.js session cookie to MRBS.
+//
+// Example: if Koinonia is at https://app.icc-bretagne.org and MRBS is at
+// https://salles.icc-bretagne.org, set:
+//
+//   $cookie_path   = '/';
+//   $cookie_domain = '.icc-bretagne.org';  // leading dot = all subdomains
+//
+// IMPORTANT: both sites must be served over HTTPS in production.
+
+$cookie_path   = '/';
+$cookie_domain = '.example.com';  // replace with your actual domain
+
+
+// ---------------------------------------------------------------------------
+// 4. (Optional) Disable MRBS user self-registration
+// ---------------------------------------------------------------------------
+// Since users are managed in Koinonia, disable the built-in registration page.
+$auth['allow_user_creation'] = false;

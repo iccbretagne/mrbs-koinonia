@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  lint:
+    name: PHP lint & static analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          tools: composer, phpstan
+          coverage: none
+
+      - name: Check PHP syntax
+        run: find web/lib/MRBS -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+        if: hashFiles('composer.json') != ''
+
+      - name: PHPStan static analysis
+        run: phpstan analyse web/lib/MRBS --level=5
+        if: hashFiles('phpstan.neon') != '' || hashFiles('phpstan.neon.dist') != ''
