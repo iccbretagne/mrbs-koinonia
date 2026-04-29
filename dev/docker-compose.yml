@@ -17,6 +17,9 @@ services:
       KOINONIA_BASE_URL:   ${KOINONIA_BASE_URL:-http://host.docker.internal:3000}
       KOINONIA_API_SECRET: ${KOINONIA_API_SECRET:-change-me}
       KOINONIA_CHURCH_ID:  ${KOINONIA_CHURCH_ID:-}
+      # Apache en root pour lire les volumes montés depuis le host (dev uniquement)
+      APACHE_RUN_USER:  root
+      APACHE_RUN_GROUP: root
     depends_on:
       db:
         condition: service_healthy
@@ -30,6 +33,8 @@ services:
       MARIADB_USER:          mrbs
       MARIADB_PASSWORD:      mrbs
       MARIADB_ROOT_PASSWORD: root
+    ports:
+      - "13306:3306"
     volumes:
       - mrbs_db:/var/lib/mysql
       # Initialisation du schéma MRBS au premier démarrage
