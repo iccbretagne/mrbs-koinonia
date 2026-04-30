@@ -2,7 +2,6 @@
 declare(strict_types=1);
 namespace MRBS\Session;
 
-use MRBS\Form;
 use MRBS\User;
 
 /**
@@ -77,7 +76,7 @@ class SessionKoinonia extends Session
 
     return [
       'action' => rtrim(KOINONIA_BASE_URL, '/') . '/?callbackUrl=' . rawurlencode($returnUrl),
-      'method' => Form::METHOD_GET,
+      'method' => 0, // Form::METHOD_GET
     ];
   }
 
