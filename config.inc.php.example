@@ -20,6 +20,14 @@ define('KOINONIA_API_SECRET', 'change-me-to-a-long-random-secret');
 // Find it in your Koinonia database or admin panel.
 define('KOINONIA_CHURCH_ID', 'clxxxxxxxxxxxxxxxxxxxxxxx');
 
+// (Optional) Public URL of Koinonia for browser redirects (login button, protected pages).
+// Set this when KOINONIA_BASE_URL is an internal/private URL unreachable by browsers
+// (e.g. KOINONIA_BASE_URL='http://koinonia:3000' for internal API calls,
+//       KOINONIA_LOGIN_URL='https://koinonia.example.com' for browser redirects).
+// Defaults to KOINONIA_BASE_URL if not set.
+//
+// define('KOINONIA_LOGIN_URL', 'https://koinonia.example.com');
+
 // Auth.js session cookie name.
 // - Development:  'authjs.session-token'  (default, leave commented out)
 // - Production:   '__Secure-authjs.session-token'

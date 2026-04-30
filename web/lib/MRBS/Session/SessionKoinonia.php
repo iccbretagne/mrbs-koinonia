@@ -25,6 +25,11 @@ use MRBS\User;
  *   define('KOINONIA_COOKIE_NAME', 'authjs.session-token');
  *   // In production Auth.js prefixes the cookie with __Secure-
  *   // Set this to '__Secure-authjs.session-token' for production deployments.
+ *
+ *   define('KOINONIA_LOGIN_URL', 'https://koinonia.example.com');
+ *   // Public URL used for browser redirects (login button, protected pages).
+ *   // Set this when KOINONIA_BASE_URL is an internal URL unreachable by browsers.
+ *   // Defaults to KOINONIA_BASE_URL if not set.
  */
 class SessionKoinonia extends Session
 {
@@ -75,7 +80,7 @@ class SessionKoinonia extends Session
       . ($_SERVER['REQUEST_URI'] ?? '/');
 
     return [
-      'action' => rtrim(KOINONIA_BASE_URL, '/') . '/?callbackUrl=' . rawurlencode($returnUrl),
+      'action' => $this->loginBaseUrl() . '/?callbackUrl=' . rawurlencode($returnUrl),
       'method' => 0, // Form::METHOD_GET
     ];
   }
@@ -93,6 +98,18 @@ class SessionKoinonia extends Session
   // -------------------------------------------------------------------------
   // Private helpers
   // -------------------------------------------------------------------------
+
+  /**
+   * Public URL for browser redirects (login button, protected pages).
+   * Uses KOINONIA_LOGIN_URL if defined, falls back to KOINONIA_BASE_URL.
+   */
+  private function loginBaseUrl(): string
+  {
+    return defined('KOINONIA_LOGIN_URL')
+      ? rtrim(KOINONIA_LOGIN_URL, '/')
+      : rtrim(KOINONIA_BASE_URL, '/');
+  }
+
 
   /**
    * Reads the Auth.js session token from the raw Cookie header.
@@ -215,8 +232,7 @@ class SessionKoinonia extends Session
       . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')
       . ($_SERVER['REQUEST_URI'] ?? '/');
 
-    $target = rtrim(KOINONIA_BASE_URL, '/')
-      . '/?callbackUrl=' . rawurlencode($returnUrl);
+    $target = $this->loginBaseUrl() . '/?callbackUrl=' . rawurlencode($returnUrl);
 
     header('Location: ' . $target, true, 302);
     exit;
