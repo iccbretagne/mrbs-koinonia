@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace MRBS\Session;
 
+use MRBS\Form;
 use MRBS\User;
 
 /**
@@ -9,8 +10,8 @@ use MRBS\User;
  *
  * Reads the Auth.js session cookie set by Koinonia, calls the Koinonia
  * /api/auth/mrbs/session endpoint to resolve the current user, then builds
- * an MRBS User object.  No login form is shown — unauthenticated visitors
- * are redirected to the Koinonia login page.
+ * an MRBS User object.  Unauthenticated visitors can browse in read-only mode
+ * and see a "Login" button in the MRBS header to connect via Koinonia.
  *
  * Usage in config.inc.php:
  *   $auth['type']    = 'koinonia';
@@ -31,8 +32,8 @@ class SessionKoinonia extends Session
   private const DEFAULT_COOKIE = 'authjs.session-token';
 
   /**
-   * Returns the authenticated MRBS user, or null for public anonymous access.
-   * Redirects to Koinonia login for pages that require authentication.
+   * Returns the authenticated MRBS user, or null for anonymous read-only access.
+   * Redirects to Koinonia login only for pages that require authentication.
    */
   public function getCurrentUser(): ?User
   {
@@ -61,6 +62,32 @@ class SessionKoinonia extends Session
     $user->level        = (int) ($data['level'] ?? 0);
 
     return $user;
+  }
+
+
+  /**
+   * Returns form params for the "Login" button shown in the MRBS header.
+   * Clicking redirects to Koinonia login with the current URL as callbackUrl.
+   */
+  public function getLogonFormParams(): ?array
+  {
+    $returnUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http')
+      . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')
+      . ($_SERVER['REQUEST_URI'] ?? '/');
+
+    return [
+      'action' => rtrim(KOINONIA_BASE_URL, '/') . '/?callbackUrl=' . rawurlencode($returnUrl),
+      'method' => Form::METHOD_GET,
+    ];
+  }
+
+
+  /**
+   * No logout button in MRBS — logout is managed by Koinonia.
+   */
+  public function getLogoffFormParams(): ?array
+  {
+    return null;
   }
 
 
